@@ -20,11 +20,12 @@ function M.reset()
 end
 
 function M.runner(opts)
+    M._close = (opts.close == "1") and true or false
     M.reset()
     M._asyncrun_term = terminal:new({
         cmd = opts.cmd,
         dir = opts.cwd,
-        close_on_exit = (opts.close == "1") and true or false,
+        close_on_exit = false,
         hidden = true,
         clear_env = M._clear_env or false,
         on_open = function(term)
@@ -37,6 +38,9 @@ function M.runner(opts)
         on_exit = function(term, job_id, exit_code, event_name)
             vim.g.asyncrun_code = exit_code
             vim.cmd("doautocmd User AsyncRunStop")
+            if M._close and exit_code == 0 then
+                M._asyncrun_term_toggle()
+            end
         end,
     })
 
